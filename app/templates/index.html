@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1 class="shoha">WELCOME</h1>
+
+    <ol>
+        {% for p in names %}
+            {% if p.name == 'Shoha' %}
+
+                <li><strong>{{ p.name }} is {{ p['age'] }} years old</strong></li>
+            {% else %}
+            
+                <li>{{ p.name }} is {{ p.age }} years old</li>
+
+            {% endif %}
+
+        {% endfor %}
+    </ol>
+
+    <a href="/login">Login Page</a>
+
+{% endblock %}
+
+
+
