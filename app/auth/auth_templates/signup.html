@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+
+
+{% block content %}
+
+
+<h1>Sign Up</h1>
+<form method="POST">
+    {{ x.hidden_tag() }}
+
+    {{ x.username(class='form-control', placeholder='Username') }}
+    {{ x.email(class='form-control', placeholder='Email') }}
+    {{ x.password(class='form-control', placeholder='Password') }}
+    {{ x.confirm_password(class='form-control', placeholder='Confirm Password') }}
+    {{ x.submit(class='btn btn-primary') }}
+</form>
+
+{% endblock %}
