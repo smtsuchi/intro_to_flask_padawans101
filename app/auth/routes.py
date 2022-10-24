@@ -1,5 +1,5 @@
-from flask import Blueprint, render_template, request, redirect, url_for
-from flask_login import login_user, logout_user, current_user
+from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask_login import login_user, logout_user
 from .forms import LoginForm, UserCreationForm
 from app.models import User
 from werkzeug.security import check_password_hash
@@ -15,39 +15,44 @@ def signMeUp():
             username = form.username.data
             email = form.email.data
             password = form.password.data
+            u1 = User.query.filter_by(username=username).first()
+            u2 = User.query.filter_by(email=email).first()
+            if u1 and u2:
+                flash('That username AND email already belong to an acount.', 'danger')
+            elif u1:       
+                flash('That username already belongs to an acoount', 'danger')
+            elif u2:
+                flash('That email already belongs to an acoount', 'danger')
+            else:
 
-            print(username, email, password)
-
-            #add user to database
-            user = User(username, email, password)\
-            
-            #add instance to SQL
-            user.saveToDB()
-
-            return redirect(url_for('auth.logMeIn'))   
+                #add user to database
+                user = User(username, email, password)
+                
+                #add instance to SQL
+                user.saveToDB()
+                flash('Successfully created a user', 'success')
+                return redirect(url_for('auth.logMeIn'))   
     return render_template('signup.html', x=form)
 
 @auth.route('/login', methods=["GET", "POST"])
 def logMeIn():
     form = LoginForm()
     if request.method == "POST":
-        print('post method made')
         if form.validate():
             username = form.username.data
             password = form.password.data
-            print(username, password)
             
             user = User.query.filter_by(username=username).first()
             if user:
                 if check_password_hash(user.password, password):
-                    print('succesfully logged in')
+                    flash(f'Succesfully logged in. Welcome back, {user.username}!', 'success')
                     login_user(user)
                     return redirect(url_for('homePage'))
                 else:
-                    print('incorrect password')
+                    flash('Incorrect password.', 'danger')
 
             else:
-                print('user does not exist')
+                flash('A user with that username does not exist.', 'danger')
 
 
 
