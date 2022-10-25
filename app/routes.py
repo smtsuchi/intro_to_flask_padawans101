@@ -1,22 +1,26 @@
 from app import app
 from flask import render_template
-
+from flask_login import current_user
+from .models import User
 
 @app.route('/')
 def homePage():
-    people = [
-        {
-        'name': "Shoha",
-        'age': 9000
-    },
-    {'name': "Brandt",
-        'age': 9001}
-        ,
-        {'name': "Blair",
-        'age': 8999}
-        ]
+    users = User.query.all()
 
 
-    return render_template('index.html', names=people)
+    following_set = set()
+    if current_user.is_authenticated:    
+        who_i_am_following = current_user.followed.all()
+        print(who_i_am_following)
+        for u in who_i_am_following:
+            following_set.add(u.id)
+        
+        for u in users:
+            if u.id in following_set:
+                u.flag = True
+            
+
+
+    return render_template('index.html', users=users)
 
 

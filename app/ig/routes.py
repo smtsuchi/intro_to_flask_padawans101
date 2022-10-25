@@ -1,6 +1,6 @@
-from flask import Blueprint, render_template, request, url_for, redirect
+from flask import Blueprint, render_template, request, url_for, redirect, flash
 from flask_login import current_user, login_required
-from app.models import Post
+from app.models import Post, User
 from .forms import PostForm
 
 ig = Blueprint('ig', __name__, template_folder='ig_templates')
@@ -26,6 +26,8 @@ def createPost():
 @ig.route('/posts')
 def viewPosts():
     posts = Post.query.order_by(Post.date_created).all()[::-1]
+    for p in posts:
+        p.like_counter = len(p.liked.all())
     return render_template('feed.html', posts=posts)
 
 @ig.route('/posts/<int:post_id>')
@@ -64,7 +66,6 @@ def updatePost(post_id):
     return render_template('update_post.html', form = form, post = post)
 
 @ig.route('/posts/<int:post_id>/delete', methods=["GET"])
-
 def deletePost(post_id):
     post = Post.query.get(post_id)
     if current_user.id == post.user_id:
@@ -73,3 +74,39 @@ def deletePost(post_id):
         print("You cannot delete another user's posts.")
     return redirect(url_for('ig.viewPosts'))
     
+
+@ig.route('/follow/<int:user_id>')
+@login_required
+def followUser(user_id):
+    user = User.query.get(user_id)
+    if user:
+
+        current_user.follow(user)
+        flash(f'Successfully followed {user.username}.', 'success')
+    else:
+        flash(f'That user does not exist', 'danger')
+
+    return redirect(url_for('homePage'))
+
+@ig.route('/unfollow/<int:user_id>')
+@login_required
+def unfollowUser(user_id):
+    user = User.query.get(user_id)
+    if user:
+        current_user.unfollow(user)
+        flash(f'Successfully unfollowed {user.username}.', 'success')
+    else:
+        flash(f'That user does not exist', 'danger')
+
+    return redirect(url_for('homePage'))
+
+@ig.route('/like/<int:post_id>')
+def likePost(post_id):
+    post = Post.query.get(post_id)
+    my_likes = current_user.liked
+    if post in my_likes:
+        flash('You already liked that!', 'danger')
+    else:
+        post.like(current_user)
+
+    return redirect(url_for('ig.viewPosts'))

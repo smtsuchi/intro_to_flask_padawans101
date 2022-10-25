@@ -3,6 +3,7 @@ from config import Config
 from flask_migrate import Migrate
 from .models import db, User
 from flask_login import LoginManager
+from flask_moment import Moment
 
 # import blueprint
 from .auth.routes import auth
@@ -10,6 +11,7 @@ from .ig.routes import ig
 
 app = Flask(__name__)
 login = LoginManager()
+moment = Moment(app)
 
 @login.user_loader
 def load_user(user_id):

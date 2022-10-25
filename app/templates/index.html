@@ -3,21 +3,35 @@
 {% block content %}
     <h1 class="shoha">WELCOME</h1>
 
-    <ol>
-        {% for p in names %}
-            {% if p.name == 'Shoha' %}
+   
 
-                <li><strong>{{ p.name }} is {{ p['age'] }} years old</strong></li>
-            {% else %}
+    
+    <div class="card" style="width: 18rem;">
+        <ul class="list-group list-group-flush">
             
-                <li>{{ p.name }} is {{ p.age }} years old</li>
+            {% for u in users %}
+                {% if u.username == current_user.username %}
+                     
+                {% elif u.flag == True %}
+                    <li class="list-group-item">
+                        {{ u.username }}
+                        <a class="btn btn-danger" href="{{ url_for('ig.unfollowUser', user_id=u.id) }}">Unfollow</a>
+                    </li> 
 
-            {% endif %}
-
-        {% endfor %}
-    </ol>
+                {% else %}
+                    <li class="list-group-item">
+                        {{ u.username }}
+                        <a class="btn btn-primary" href="{{ url_for('ig.followUser', user_id=u.id) }}">Follow</a>
+                    </li> 
+        
+                {% endif %}
+        
+            {% endfor %}
+        </ul>
+    </div>
+  
 
     <a href="/login">Login Page</a>
-
+    
 {% endblock %}
 

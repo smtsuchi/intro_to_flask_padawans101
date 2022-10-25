@@ -11,7 +11,12 @@
           <h5 class="card-title">{{ post.title }}</h5>
           <h6 class="card-subtitle mb-2 text-muted">{{ post.author.username }}</h6>
           <p class="card-text">{{ post.caption }}</p>
+          <small>{{ moment(post.date_created).fromNow() }}</small>
+          
         </div>
+        <a href="{{ url_for('ig.likePost', post_id=post.id) }}" class="card-text">
+          like {{ post.like_counter }}
+        </a>
     </a>
 
     {% endfor %}
