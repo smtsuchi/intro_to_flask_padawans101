@@ -85,3 +85,14 @@ class Post(db.Model):
     def like(self, user):
         self.liked.append(user)
         db.session.commit()
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "title": self.title,
+            "img_url": self.img_url,
+            "caption": self.caption,
+            "date_created": self.date_created,
+            "user_id": self.user_id,
+            "author": self.author.username
+        }

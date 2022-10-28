@@ -110,3 +110,61 @@ def likePost(post_id):
         post.like(current_user)
 
     return redirect(url_for('ig.viewPosts'))
+
+######################## API ROUTES START HERE ############################
+
+@ig.get('/api/posts')
+def getPostsAPI():
+    posts = Post.query.all()
+    new_posts = [p.to_dict() for p in posts]
+    return {
+        'status': 'ok',
+        'data': new_posts,
+        'total_results': len(new_posts)
+    }
+
+@ig.get('/api/posts/<int:post_id>')
+def getSinglePostAPI(post_id):
+    post = Post.query.get(post_id)
+    if post:
+        return {
+            'status': 'ok',
+            'data': post.to_dict()
+        }
+    return {
+        'status': 'not ok',
+        'message': 'That post does not exist. Try agin.'
+    }
+
+@ig.post('/api/posts/create')
+def createPostAPI():
+    data = request.json # this is coming from POST request body
+    title = data['title'],
+    caption = data['caption']
+    user_id = data['user_id']
+    img_url = data['img_url']
+    post = Post(title, img_url, caption, user_id)
+    post.saveToDB()
+    return {
+        'status': 'ok',
+        'message': "Post was succesfully created."
+    }
+
+
+@ig.post('/api/posts/people_i_follow')
+def getPostsOfPeopleIFollow():
+    data = request.json
+    user_id = data['me']
+    me = User.query.get(user_id)
+    
+    people = me.followed.all()
+
+    all_posts = []
+    for p in people:
+        all_posts += Post.query.filter_by(user_id = p.id).all()
+    all_posts.sort(key=lambda x: x.date_created)
+    all_posts = all_posts[::-1]
+    return {
+        'status': 'ok',
+        'data': [p.to_dict() for p in all_posts]
+    }
