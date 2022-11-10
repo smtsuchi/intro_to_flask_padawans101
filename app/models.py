@@ -3,6 +3,8 @@ from flask_login import UserMixin
 from datetime import datetime
 from werkzeug.security import generate_password_hash
 
+from secrets import token_hex
+
 db = SQLAlchemy()
 
 # create Models based off of our ERD
@@ -24,6 +26,7 @@ class User(db.Model, UserMixin):
     username = db.Column(db.String(50), nullable=False, unique=True)
     email = db.Column(db.String(150), nullable=False, unique=True)
     password = db.Column(db.String(250), nullable=False)
+    apitoken = db.Column(db.String, default=None, nullable=True)
     post = db.relationship("Post", backref='author', lazy=True)
     followed = db.relationship("User",
         primaryjoin = (followers.c.follower_id==id),
@@ -37,6 +40,15 @@ class User(db.Model, UserMixin):
         self.username = username
         self.email = email
         self.password = generate_password_hash(password)
+        self.apitoken = token_hex(16)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'username': self.username,
+            'email': self.email,
+            'token': self.apitoken
+        }
 
     def saveToDB(self):
         db.session.add(self)
