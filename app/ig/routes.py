@@ -3,6 +3,8 @@ from flask_login import current_user, login_required
 from app.models import Post, User
 from .forms import PostForm
 
+from ..apiauthhelper import token_required
+
 ig = Blueprint('ig', __name__, template_folder='ig_templates')
 
 @ig.route('/posts/create', methods=["GET", "POST"])
@@ -137,13 +139,14 @@ def getSinglePostAPI(post_id):
     }
 
 @ig.post('/api/posts/create')
-def createPostAPI():
+@token_required
+def createPostAPI(user):
     data = request.json # this is coming from POST request body
     title = data['title'],
     caption = data['caption']
-    user_id = data['user_id']
     img_url = data['img_url']
-    post = Post(title, img_url, caption, user_id)
+
+    post = Post(title, img_url, caption, user.id)
     post.saveToDB()
     return {
         'status': 'ok',
