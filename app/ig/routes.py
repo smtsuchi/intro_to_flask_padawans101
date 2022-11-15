@@ -153,6 +153,49 @@ def createPostAPI(user):
         'message': "Post was succesfully created."
     }
 
+@ig.post('/api/posts/update/<int:post_id>')
+@token_required
+def updatePostAPI(user, post_id):
+    data = request.json # this is coming from POST request body
+    title = data['title'],
+    caption = data['caption']
+    img_url = data['img_url']
+
+    post = Post.query.get(post_id)
+
+    if post.author.id != user.id:
+        return {
+            'status': 'not ok',
+            'message': "You cannot update another user's posts."
+        }
+
+    post.title = title
+    post.caption = caption
+    post.img_url = img_url
+
+    post.saveChanges()
+    return {
+        'status': 'ok',
+        'message': "Post was succesfully updated."
+    }
+
+@ig.delete('/api/posts/delete/<int:post_id>')
+@token_required
+def deletePostAPI(user, post_id):
+
+    post = Post.query.get(post_id)
+
+    if post.author.id != user.id:
+        return {
+            'status': 'not ok',
+            'message': "You cannot delete another user's posts."
+        }
+
+    post.deleteFromDB()
+    return {
+        'status': 'ok',
+        'message': "Post was succesfully deleted."
+    }
 
 @ig.post('/api/posts/people_i_follow')
 def getPostsOfPeopleIFollow():

@@ -1,7 +1,7 @@
 from app import app
 from flask import render_template
 from flask_login import current_user
-from .models import User
+from .models import User, Product
 
 @app.route('/')
 def homePage():
@@ -24,3 +24,12 @@ def homePage():
     return render_template('index.html', users=users)
 
 
+@app.get('/api/products')
+def getProductsAPI():
+    products = Product.query.all()
+    new_products = [p.to_dict() for p in products]
+    return {
+        'status': 'ok',
+        'data': new_products,
+        'total_results': len(new_products)
+    }
