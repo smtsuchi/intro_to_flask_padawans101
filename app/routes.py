@@ -1,7 +1,8 @@
 from app import app
-from flask import render_template
+from flask import render_template, request
 from flask_login import current_user
-from .models import User, Product
+from .models import User, Product, Cart
+from .apiauthhelper import token_required
 
 @app.route('/')
 def homePage():
@@ -33,3 +34,45 @@ def getProductsAPI():
         'data': new_products,
         'total_results': len(new_products)
     }
+
+@app.post('/api/cart/add')
+@token_required
+def addToCartAPI(user):
+    data = request.json
+    product_id = data['product_id']
+    product = Product.query.get(product_id)
+    if product:
+        user.addToCart(product)
+        return {
+            'status': 'ok',
+            'message': 'Succesfully added item to cart'
+        }
+    return {
+        'status': 'not ok',
+        'message': 'A product with that ID does not exist.'
+    }
+
+@app.get('/api/cart')
+@token_required
+def getCartAPI(user):
+    cart = [Product.query.get(c.product_id).to_dict() for c in Cart.query.filter_by(user_id=user.id).all()]
+    return {
+        'status': 'ok',
+        'cart': cart
+    }
+
+@app.post('/api/cart/remove')
+@token_required
+def removeFromCartAPI(user):
+    data = request.json
+    product_id = data['product_id']
+
+    cart_item = Cart.query.filter_by(user_id=user.id).filter_by(product_id=product_id).first()
+    if cart_item:
+        cart_item.deleteFromDB()
+        return {
+            'status': 'ok',
+            'message': 'Succesfully removed item from cart'
+        }
+
+   
