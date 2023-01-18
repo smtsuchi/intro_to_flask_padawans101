@@ -76,3 +76,28 @@ def removeFromCartAPI(user):
         }
 
    
+#### STRIPE CHECKOUT ####
+import stripe
+from flask import redirect
+import os
+STRIPE_API_KEY=os.environ.get('STRIPE_API_KEY')
+stripe.api_key = STRIPE_API_KEY
+
+@app.post('/stripe')
+def stripeCheckout():
+    # receive ifno from react here
+    data = request.form
+    line_items = []
+    for price_id, qty in data.items():
+        line_items.append({
+            'price': price_id,
+            'quantity': qty
+        })
+
+    checkout_session = stripe.checkout.Session.create(
+        line_items=line_items,
+        mode='payment',
+        success_url='https://padawans101.web.app/?success=true',
+        cancel_url='https://padawans101.web.app/?cancel=true'
+        )
+    return redirect(checkout_session.url, code=303)
